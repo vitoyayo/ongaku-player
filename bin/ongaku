@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+# Ongaku Player - Reproductor de YouTube para terminal
+# https://github.com/vitoyayo/ongaku-player
+
+require_relative '../lib/ongaku_player'
+
+OngakuPlayer.run
