@@ -1,6 +1,7 @@
 require 'socket'
 require 'json'
 require 'timeout'
+require_relative 'url_cache'
 
 class Player
   attr_reader :current_track, :playing
@@ -9,7 +10,9 @@ class Player
   AUDIO_FORMAT = '251/140/bestaudio'.freeze  # Opus (251), M4A (140), or best available
   VOLUME_STEP = 5                             # Volume increment/decrement amount
   SEEK_SECONDS = 10                           # Seek forward/backward amount
-  STARTUP_DELAY = 2                           # Seconds to wait for yt-dlp to start
+  STARTUP_DELAY = 2                           # Fallback delay if dynamic wait fails
+  DYNAMIC_WAIT_TIMEOUT = 10                   # Max seconds to wait for playback to start
+  DYNAMIC_WAIT_INTERVAL = 0.1                 # Check interval for dynamic wait
 
   def initialize
     @pid = nil
@@ -64,6 +67,40 @@ class Player
   end
 
   def play_with_pipe(url)
+    # Check if we have a cached direct URL (from prefetch)
+    cached_url = UrlCache.instance.get(url)
+
+    if cached_url
+      # Use cached direct URL - much faster!
+      warn "[DEBUG] Using cached URL for instant playback" if ENV['DEBUG']
+      play_direct_url(cached_url)
+    else
+      # Fallback to yt-dlp pipe method
+      play_with_ytdlp_pipe(url)
+    end
+  end
+
+  def play_direct_url(direct_url)
+    # Play directly from the resolved URL - no yt-dlp needed
+    @pid = fork do
+      $stdout.reopen('/dev/null', 'w')
+      $stderr.reopen('/dev/null', 'w')
+      exec('mpv', '--no-video', '--no-terminal', "--input-ipc-server=#{SOCKET_PATH}", direct_url)
+    end
+
+    # Monitor when playback ends
+    Thread.new do
+      Process.wait(@pid) rescue nil
+      @playing = false
+      @current_track = nil
+      @pid = nil
+    end
+
+    # Wait for mpv to start (usually very fast with direct URL)
+    wait_for_playback_start
+  end
+
+  def play_with_ytdlp_pipe(url)
     # Create pipe for communication between yt-dlp and mpv
     reader, writer = IO.pipe
 
@@ -71,13 +108,20 @@ class Player
     ytdlp_cmd = File.exist?(File.expand_path('~/.local/bin/yt-dlp-new')) ?
                 File.expand_path('~/.local/bin/yt-dlp-new') : 'yt-dlp'
 
-    # yt-dlp downloads and writes to pipe
-    # Format 251 (opus webm) or 140 (m4a) - direct formats without HLS
+    # yt-dlp downloads and writes to pipe with optimization flags
     @ytdlp_pid = fork do
       reader.close
       $stdout.reopen(writer)
       $stderr.reopen('/dev/null', 'w')
-      exec(ytdlp_cmd, '-f', AUDIO_FORMAT, '-o', '-', '--no-warnings', '--no-progress', url)
+      exec(ytdlp_cmd,
+           '-f', AUDIO_FORMAT,
+           '-o', '-',
+           '--no-warnings',
+           '--no-progress',
+           '--no-playlist',           # Don't process as playlist
+           '--no-check-certificates', # Skip SSL verification (faster)
+           '--socket-timeout', '5',   # Shorter timeout
+           url)
     end
     writer.close
 
@@ -101,8 +145,30 @@ class Player
       @ytdlp_pid = nil
     end
 
-    # Wait for yt-dlp to start sending data
+    # Dynamic wait for playback to start
+    wait_for_playback_start
+  end
+
+  # Wait dynamically for playback to start instead of fixed sleep
+  def wait_for_playback_start
+    start_time = Time.now
+
+    # Wait for socket to appear (indicates mpv is ready)
+    while (Time.now - start_time) < DYNAMIC_WAIT_TIMEOUT
+      if File.exist?(SOCKET_PATH)
+        # Socket exists, check if we can get duration or time-pos
+        if get_property('duration') || get_property('time-pos')
+          warn "[DEBUG] Playback started in #{(Time.now - start_time).round(2)}s" if ENV['DEBUG']
+          return true
+        end
+      end
+      sleep DYNAMIC_WAIT_INTERVAL
+    end
+
+    # Fallback: if we couldn't detect start, just wait a bit more
+    warn "[DEBUG] Playback start detection timed out, using fallback" if ENV['DEBUG']
     sleep STARTUP_DELAY
+    true
   end
 
   def stop
