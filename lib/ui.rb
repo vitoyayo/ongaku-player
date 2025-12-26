@@ -4,12 +4,14 @@ require 'pastel'
 require_relative 'youtube_search'
 require_relative 'player'
 require_relative 'favorites'
+require_relative 'url_cache'
 
 class UI
   # Search and queue settings
   SEARCH_RESULTS_LIMIT = 50
   RELATED_VIDEOS_LIMIT = 30
   AUTO_QUEUE_SIZE = 20        # Suggestions added to queue automatically
+  PREFETCH_LIMIT = 3          # Number of URLs to prefetch from search results
 
   # UI display settings
   MENU_PAGE_SIZE = 10
@@ -165,6 +167,9 @@ class UI
         return
       end
 
+      # Prefetch URLs for the first results in background (for faster playback)
+      prefetch_urls(results.first(PREFETCH_LIMIT))
+
       choices = results.map do |result|
         {
           name: "#{result[:title]} [#{result[:duration]}]",
@@ -185,6 +190,13 @@ class UI
       @prompt.error("Error: #{e.message}")
       sleep LONG_DELAY
     end
+  end
+
+  def prefetch_urls(tracks)
+    return if tracks.empty?
+    urls = tracks.map { |t| t[:url] }
+    UrlCache.instance.prefetch_batch(urls, Player::AUDIO_FORMAT, limit: PREFETCH_LIMIT)
+    warn "[DEBUG] Prefetching #{urls.size} URLs in background" if ENV['DEBUG']
   end
 
   def add_to_queue(track)
@@ -374,6 +386,9 @@ class UI
         new_suggestions.first(AUTO_QUEUE_SIZE).each do |track|
           @queue << track unless @queue.any? { |t| t[:id] == track[:id] }
         end
+
+        # Prefetch the next few tracks for faster playback
+        prefetch_urls(new_suggestions.first(PREFETCH_LIMIT))
 
         # Save the rest as additional suggestions
         @suggestions = new_suggestions.drop(AUTO_QUEUE_SIZE)
