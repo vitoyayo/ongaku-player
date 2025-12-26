@@ -6,25 +6,25 @@ class YouTubeSearch
   class SearchError < StandardError; end
 
   def self.search(query, max_results = 10)
-    # Usar modo demo si no hay conexión o está habilitado
+    # Use demo mode if there's no connection or it's enabled
     if DemoMode.enabled?
       return DemoMode.search(query, max_results)
     end
 
-    # Procesar tags en la búsqueda
+    # Process tags in the search
     tags = extract_tags(query)
     search_query = query
 
-    # Si hay tags, optimizar la búsqueda
+    # If there are tags, optimize the search
     if tags.any?
-      # Remover los # de los tags para la búsqueda
+      # Remove # from tags for the search
       tag_terms = tags.map { |t| t.gsub('#', '') }.join(' ')
-      # Combinar con el resto de la query
+      # Combine with the rest of the query
       base_query = query.gsub(/#\w+/, '').strip
       search_query = "#{base_query} #{tag_terms}".strip
     end
 
-    # Buscar videos en YouTube usando yt-dlp
+    # Search videos on YouTube using yt-dlp
     cmd = [
       'yt-dlp',
       '--dump-json',
@@ -32,16 +32,16 @@ class YouTubeSearch
       '--flat-playlist',
       '--no-warnings',
       '--quiet',
-      "ytsearch#{max_results * 2}:#{search_query}"  # Buscar más para filtrar después
+      "ytsearch#{max_results * 2}:#{search_query}"  # Search more to filter later
     ]
 
     stdout, stderr, status = Open3.capture3(*cmd)
 
     unless status.success?
-      raise SearchError, "Error al buscar en YouTube: #{stderr}"
+      raise SearchError, "Error searching YouTube: #{stderr}"
     end
 
-    # Parsear resultados
+    # Parse results
     results = []
     stdout.each_line do |line|
       next if line.strip.empty?
@@ -57,47 +57,47 @@ class YouTubeSearch
         }
         results << track
       rescue JSON::ParserError
-        # Ignorar líneas inválidas
+        # Ignore invalid lines
       end
     end
 
-    # Si hay tags en la búsqueda, filtrar resultados
+    # If there are tags in the search, filter results
     if tags.any?
       results = filter_by_tags(results, tags, search_query)
     end
 
-    # Limitar a max_results
+    # Limit to max_results
     results.take(max_results)
   end
 
   def self.extract_tags(query)
-    # Extraer todos los tags (#palabra) de la query
+    # Extract all tags (#word) from the query
     query.scan(/#(\w+)/).flatten.map { |tag| "##{tag.downcase}" }
   end
 
   def self.filter_by_tags(results, tags, original_query)
-    # Filtrar resultados que contengan los tags en el título o descripción
+    # Filter results that contain tags in the title or description
     tag_words = tags.map { |t| t.gsub('#', '').downcase }
 
     filtered = results.select do |track|
       title_lower = track[:title].downcase
-      # Verificar si el título contiene alguno de los tags
+      # Check if the title contains any of the tags
       tag_words.any? { |tag| title_lower.include?(tag) } ||
-      # O si los tags del video coinciden
+      # Or if the video tags match
       (track[:tags] && track[:tags].any? { |t| tag_words.include?(t.downcase) })
     end
 
-    # Si no hay resultados filtrados, devolver los originales
+    # If no filtered results, return the original ones
     filtered.any? ? filtered : results
   end
 
   def self.get_audio_url(video_url)
-    # En modo demo, devolver la URL directamente para que mpv la procese
+    # In demo mode, return the URL directly for mpv to process
     if DemoMode.enabled?
       return video_url
     end
 
-    # Obtener URL directa del audio usando yt-dlp
+    # Get direct audio URL using yt-dlp
     cmd = [
       'yt-dlp',
       '--format', 'bestaudio',
@@ -110,18 +110,18 @@ class YouTubeSearch
     stdout, stderr, status = Open3.capture3(*cmd)
 
     unless status.success?
-      raise SearchError, "Error al obtener URL de audio: #{stderr}"
+      raise SearchError, "Error getting audio URL: #{stderr}"
     end
 
     stdout.strip
   end
 
   def self.get_related(video_url, max_results = 25)
-    # Extraer video ID
+    # Extract video ID
     video_id = video_url.match(/(?:v=|youtu\.be\/)([^&]+)/)[1] rescue nil
     return [] unless video_id
 
-    # Usar YouTube Mix para obtener videos relacionados
+    # Use YouTube Mix to get related videos
     mix_url = "https://www.youtube.com/watch?v=#{video_id}&list=RD#{video_id}"
 
     cmd = [
@@ -145,7 +145,7 @@ class YouTubeSearch
 
       begin
         data = JSON.parse(line)
-        # Saltar el video actual
+        # Skip current video
         next if data['id'] == video_id
 
         track = {
@@ -157,7 +157,7 @@ class YouTubeSearch
         }
         results << track
       rescue JSON::ParserError
-        # Ignorar líneas inválidas
+        # Ignore invalid lines
       end
     end
 

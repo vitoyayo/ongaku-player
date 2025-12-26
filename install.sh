@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Ongaku Player - Script de instalación automática
-# Este script instala todas las dependencias y el reproductor
+# Ongaku Player - Automatic installation script
+# This script installs all dependencies and the player
 
 set -e
 
 echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║           🎵 Instalador de Ongaku Player 🎵                   ║"
+echo "║           🎵 Ongaku Player Installer 🎵                       ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# Detectar sistema operativo
+# Detect operating system
 detect_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [ -f /etc/debian_version ]; then
@@ -29,69 +29,69 @@ detect_os() {
     fi
 }
 
-# Verificar si un comando existe
+# Check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Instalar dependencias del sistema
+# Install system dependencies
 install_system_deps() {
     local os=$(detect_os)
 
-    echo "📦 Instalando dependencias del sistema..."
+    echo "📦 Installing system dependencies..."
     echo ""
 
     case $os in
         debian)
-            echo "Sistema detectado: Debian/Ubuntu"
+            echo "Detected system: Debian/Ubuntu"
             if ! command_exists yt-dlp || ! command_exists mpv; then
-                echo "Instalando yt-dlp y mpv..."
+                echo "Installing yt-dlp and mpv..."
                 sudo apt-get update
                 sudo apt-get install -y yt-dlp mpv
             else
-                echo "✓ yt-dlp y mpv ya están instalados"
+                echo "✓ yt-dlp and mpv are already installed"
             fi
             ;;
         arch)
-            echo "Sistema detectado: Arch Linux"
+            echo "Detected system: Arch Linux"
             if ! command_exists yt-dlp || ! command_exists mpv; then
-                echo "Instalando yt-dlp y mpv..."
+                echo "Installing yt-dlp and mpv..."
                 sudo pacman -S --noconfirm yt-dlp mpv
             else
-                echo "✓ yt-dlp y mpv ya están instalados"
+                echo "✓ yt-dlp and mpv are already installed"
             fi
             ;;
         fedora)
-            echo "Sistema detectado: Fedora/RHEL"
+            echo "Detected system: Fedora/RHEL"
             if ! command_exists yt-dlp || ! command_exists mpv; then
-                echo "Instalando mpv..."
+                echo "Installing mpv..."
                 sudo dnf install -y mpv
-                echo "Instalando yt-dlp con pip..."
+                echo "Installing yt-dlp with pip..."
                 if ! command_exists pip3; then
                     sudo dnf install -y python3-pip
                 fi
                 pip3 install --user yt-dlp
             else
-                echo "✓ yt-dlp y mpv ya están instalados"
+                echo "✓ yt-dlp and mpv are already installed"
             fi
             ;;
         macos)
-            echo "Sistema detectado: macOS"
+            echo "Detected system: macOS"
             if ! command_exists brew; then
-                echo "❌ Homebrew no está instalado."
-                echo "Por favor instala Homebrew primero: https://brew.sh"
+                echo "❌ Homebrew is not installed."
+                echo "Please install Homebrew first: https://brew.sh"
                 exit 1
             fi
             if ! command_exists yt-dlp || ! command_exists mpv; then
-                echo "Instalando yt-dlp y mpv..."
+                echo "Installing yt-dlp and mpv..."
                 brew install yt-dlp mpv
             else
-                echo "✓ yt-dlp y mpv ya están instalados"
+                echo "✓ yt-dlp and mpv are already installed"
             fi
             ;;
         *)
-            echo "⚠️  Sistema operativo no reconocido."
-            echo "Por favor instala manualmente:"
+            echo "⚠️  Operating system not recognized."
+            echo "Please install manually:"
             echo "  - yt-dlp: https://github.com/yt-dlp/yt-dlp"
             echo "  - mpv: https://mpv.io"
             if ! command_exists yt-dlp || ! command_exists mpv; then
@@ -103,45 +103,45 @@ install_system_deps() {
     echo ""
 }
 
-# Instalar gemas de Ruby
+# Install Ruby gems
 install_ruby_gems() {
-    echo "💎 Instalando gemas de Ruby..."
+    echo "💎 Installing Ruby gems..."
     echo ""
 
     if ! command_exists ruby; then
-        echo "❌ Ruby no está instalado."
-        echo "Por favor instala Ruby primero: https://www.ruby-lang.org"
+        echo "❌ Ruby is not installed."
+        echo "Please install Ruby first: https://www.ruby-lang.org"
         exit 1
     fi
 
     if ! command_exists gem; then
-        echo "❌ RubyGems no está instalado."
+        echo "❌ RubyGems is not installed."
         exit 1
     fi
 
-    echo "Versión de Ruby: $(ruby -v)"
+    echo "Ruby version: $(ruby -v)"
     echo ""
 
-    # Opción 1: Instalar como gema
+    # Option 1: Install as gem
     if [ -f "ongaku-player.gemspec" ]; then
-        echo "📦 Construyendo e instalando gema..."
+        echo "📦 Building and installing gem..."
         gem build ongaku-player.gemspec
         gem install ongaku-player-*.gem --no-document
-        echo "✓ Gema instalada"
+        echo "✓ Gem installed"
     else
-        # Opción 2: Instalar dependencias solamente
-        echo "📦 Instalando dependencias..."
+        # Option 2: Install dependencies only
+        echo "📦 Installing dependencies..."
         gem install tty-prompt tty-box tty-cursor pastel --no-document
-        echo "✓ Dependencias instaladas"
+        echo "✓ Dependencies installed"
     fi
 
     echo ""
 }
 
-# Crear enlace simbólico (si es instalación local)
+# Create symbolic link (if local installation)
 create_symlink() {
     if [ ! -f "ongaku-player.gemspec" ]; then
-        echo "🔗 Creando enlace simbólico..."
+        echo "🔗 Creating symbolic link..."
 
         local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
         local bin_path="$script_dir/bin/ongaku"
@@ -150,27 +150,27 @@ create_symlink() {
             bin_path="$script_dir/ongaku.rb"
         fi
 
-        # Instalar en ~/.local/bin o /usr/local/bin
+        # Install in ~/.local/bin or /usr/local/bin
         if [ -w "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin" 2>/dev/null; then
             ln -sf "$bin_path" "$HOME/.local/bin/ongaku"
-            echo "✓ Enlace creado en: $HOME/.local/bin/ongaku"
+            echo "✓ Link created at: $HOME/.local/bin/ongaku"
             echo ""
-            echo "Asegúrate de que $HOME/.local/bin esté en tu PATH:"
+            echo "Make sure $HOME/.local/bin is in your PATH:"
             echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
         elif [ -w "/usr/local/bin" ]; then
             sudo ln -sf "$bin_path" "/usr/local/bin/ongaku"
-            echo "✓ Enlace creado en: /usr/local/bin/ongaku"
+            echo "✓ Link created at: /usr/local/bin/ongaku"
         else
-            echo "⚠️  No se pudo crear enlace simbólico."
-            echo "Ejecuta manualmente: $bin_path"
+            echo "⚠️  Could not create symbolic link."
+            echo "Run manually: $bin_path"
         fi
         echo ""
     fi
 }
 
-# Verificar instalación
+# Verify installation
 verify_installation() {
-    echo "✅ Verificando instalación..."
+    echo "✅ Verifying installation..."
     echo ""
 
     local all_good=true
@@ -178,21 +178,21 @@ verify_installation() {
     if command_exists yt-dlp; then
         echo "✓ yt-dlp: $(yt-dlp --version)"
     else
-        echo "❌ yt-dlp no encontrado"
+        echo "❌ yt-dlp not found"
         all_good=false
     fi
 
     if command_exists mpv; then
         echo "✓ mpv: $(mpv --version | head -1)"
     else
-        echo "❌ mpv no encontrado"
+        echo "❌ mpv not found"
         all_good=false
     fi
 
     if command_exists ruby; then
         echo "✓ ruby: $(ruby -v)"
     else
-        echo "❌ ruby no encontrado"
+        echo "❌ ruby not found"
         all_good=false
     fi
 
@@ -200,43 +200,43 @@ verify_installation() {
 
     if $all_good; then
         echo "╔═══════════════════════════════════════════════════════════════╗"
-        echo "║           ✅ ¡Instalación completada con éxito! ✅            ║"
+        echo "║           ✅ Installation completed successfully! ✅          ║"
         echo "╚═══════════════════════════════════════════════════════════════╝"
         echo ""
-        echo "🚀 Para ejecutar Ongaku Player:"
+        echo "🚀 To run Ongaku Player:"
         echo ""
         if command_exists ongaku; then
             echo "   $ ongaku"
         else
             echo "   $ ./bin/ongaku"
-            echo "   o"
+            echo "   or"
             echo "   $ ruby ongaku.rb"
         fi
         echo ""
-        echo "🎵 Modo demo (sin conexión):"
+        echo "🎵 Demo mode (offline):"
         echo "   $ DEMO_MODE=1 ongaku"
         echo ""
-        echo "📖 Documentación: README.md"
+        echo "📖 Documentation: README.md"
         echo ""
-        echo "¡Disfruta tu música! 🎧"
+        echo "Enjoy your music! 🎧"
     else
-        echo "❌ La instalación no se completó correctamente."
-        echo "Por favor revisa los errores arriba."
+        echo "❌ Installation did not complete successfully."
+        echo "Please check the errors above."
         exit 1
     fi
 }
 
-# Menú principal
+# Main menu
 main() {
-    echo "Opciones de instalación:"
+    echo "Installation options:"
     echo ""
-    echo "  1) Instalación completa (recomendado)"
-    echo "  2) Solo dependencias del sistema"
-    echo "  3) Solo gemas de Ruby"
-    echo "  4) Verificar instalación"
+    echo "  1) Full installation (recommended)"
+    echo "  2) System dependencies only"
+    echo "  3) Ruby gems only"
+    echo "  4) Verify installation"
     echo ""
 
-    read -p "Selecciona una opción [1-4]: " choice
+    read -p "Select an option [1-4]: " choice
     echo ""
 
     case $choice in
@@ -248,18 +248,18 @@ main() {
             ;;
         2)
             install_system_deps
-            echo "✓ Dependencias del sistema instaladas"
+            echo "✓ System dependencies installed"
             ;;
         3)
             install_ruby_gems
             create_symlink
-            echo "✓ Gemas de Ruby instaladas"
+            echo "✓ Ruby gems installed"
             ;;
         4)
             verify_installation
             ;;
         *)
-            echo "Opción inválida. Ejecutando instalación completa..."
+            echo "Invalid option. Running full installation..."
             install_system_deps
             install_ruby_gems
             create_symlink
@@ -268,5 +268,5 @@ main() {
     esac
 }
 
-# Ejecutar instalación
+# Run installation
 main

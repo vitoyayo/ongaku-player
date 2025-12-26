@@ -15,30 +15,30 @@ class Player
   end
 
   def play(url, track_info = nil)
-    # Detener cualquier reproducción anterior
+    # Stop any previous playback
     stop
 
-    # Limpiar socket anterior si existe
+    # Clean up previous socket if exists
     File.delete(SOCKET_PATH) if File.exist?(SOCKET_PATH)
 
     @current_track = track_info
     @playing = true
 
-    # Detectar si es un live stream
+    # Detect if it's a live stream
     is_live = track_info && (track_info[:duration] == "LIVE" || track_info[:duration] == "?")
 
     if is_live
-      # Para live streams, usar mpv directamente (maneja mejor HLS)
+      # For live streams, use mpv directly (handles HLS better)
       play_direct(url)
     else
-      # Para videos normales, usar pipe yt-dlp -> mpv (evita 403 en HLS)
+      # For normal videos, use pipe yt-dlp -> mpv (avoids 403 on HLS)
       play_with_pipe(url)
     end
 
     true
   rescue => e
     stop
-    puts "Error al reproducir: #{e.message}"
+    puts "Error playing: #{e.message}"
     false
   end
 
@@ -60,15 +60,15 @@ class Player
   end
 
   def play_with_pipe(url)
-    # Crear pipe para comunicación entre yt-dlp y mpv
+    # Create pipe for communication between yt-dlp and mpv
     reader, writer = IO.pipe
 
-    # Usar yt-dlp actualizado con formato directo (no HLS)
+    # Use updated yt-dlp with direct format (not HLS)
     ytdlp_cmd = File.exist?(File.expand_path('~/.local/bin/yt-dlp-new')) ?
                 File.expand_path('~/.local/bin/yt-dlp-new') : 'yt-dlp'
 
-    # yt-dlp descarga y escribe al pipe
-    # Formato 251 (opus webm) o 140 (m4a) - formatos directos sin HLS
+    # yt-dlp downloads and writes to pipe
+    # Format 251 (opus webm) or 140 (m4a) - direct formats without HLS
     @ytdlp_pid = fork do
       reader.close
       $stdout.reopen(writer)
@@ -77,7 +77,7 @@ class Player
     end
     writer.close
 
-    # mpv lee del pipe
+    # mpv reads from pipe
     @pid = fork do
       $stdin.reopen(reader)
       $stdout.reopen('/dev/null', 'w')
@@ -86,7 +86,7 @@ class Player
     end
     reader.close
 
-    # Monitorear cuando termina la reproducción
+    # Monitor when playback ends
     Thread.new do
       Process.wait(@pid) rescue nil
       Process.kill('TERM', @ytdlp_pid) rescue nil
@@ -97,12 +97,12 @@ class Player
       @ytdlp_pid = nil
     end
 
-    # Esperar a que yt-dlp comience a enviar datos
+    # Wait for yt-dlp to start sending data
     sleep 2
   end
 
   def stop
-    # Matar yt-dlp primero
+    # Kill yt-dlp first
     if @ytdlp_pid
       begin
         Process.kill('TERM', @ytdlp_pid)
@@ -112,7 +112,7 @@ class Player
       @ytdlp_pid = nil
     end
 
-    # Matar mpv
+    # Kill mpv
     if @pid
       begin
         Process.kill('TERM', @pid)
@@ -125,7 +125,7 @@ class Player
     @playing = false
     @current_track = nil
 
-    # Limpiar socket
+    # Clean up socket
     File.delete(SOCKET_PATH) if File.exist?(SOCKET_PATH)
   end
 

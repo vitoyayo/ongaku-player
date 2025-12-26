@@ -2,20 +2,20 @@
 
 require_relative 'lib/youtube_search'
 
-puts "🔍 Probando búsqueda en YouTube...\n\n"
+puts "🔍 Testing YouTube search...\n\n"
 
 begin
   results = YouTubeSearch.search("lofi hip hop", 5)
 
-  puts "Resultados encontrados: #{results.length}\n\n"
+  puts "Results found: #{results.length}\n\n"
 
   results.each_with_index do |track, i|
     puts "#{i+1}. #{track[:title]}"
-    puts "   Duración: #{track[:duration]}"
+    puts "   Duration: #{track[:duration]}"
     puts "   URL: #{track[:url]}\n\n"
   end
 
-  puts "\n✅ Búsqueda funcionando correctamente!"
+  puts "\n✅ Search working correctly!"
 
 rescue => e
   puts "❌ Error: #{e.message}"

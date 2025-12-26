@@ -4,15 +4,15 @@ module OngakuPlayer
   VERSION = "1.0.0"
 
   def self.run
-    # Verificar dependencias del sistema
+    # Check system dependencies
     check_dependencies
 
-    # Iniciar interfaz
+    # Start interface
     begin
       ui = UI.new
       ui.start
     rescue Interrupt
-      puts "\n\n👋 ¡Hasta luego!"
+      puts "\n\n👋 Goodbye!"
       exit
     rescue => e
       puts "\n❌ Error: #{e.message}"
@@ -33,15 +33,15 @@ module OngakuPlayer
     end
 
     unless missing.empty?
-      puts "❌ Faltan dependencias del sistema: #{missing.join(', ')}"
-      puts "\n📦 Instalación de dependencias:\n\n"
+      puts "❌ Missing system dependencies: #{missing.join(', ')}"
+      puts "\n📦 Dependency installation:\n\n"
       puts "  Ubuntu/Debian:"
       puts "  $ sudo apt-get install #{missing.join(' ')}\n\n"
       puts "  macOS:"
       puts "  $ brew install #{missing.join(' ')}\n\n"
       puts "  Arch Linux:"
       puts "  $ sudo pacman -S #{missing.join(' ')}\n\n"
-      puts "  O ejecuta el script de instalación:"
+      puts "  Or run the installation script:"
       puts "  $ sudo ./install.sh\n"
       exit 1
     end

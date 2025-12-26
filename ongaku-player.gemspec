@@ -3,8 +3,8 @@ Gem::Specification.new do |spec|
   spec.version       = "1.0.0"
   spec.authors       = ["Ongaku Player Team"]
   spec.email         = [""]
-  spec.summary       = "Reproductor de música de YouTube para terminal"
-  spec.description   = "Un reproductor ligero de YouTube para terminal, escrito en Ruby. Similar a lowfi pero con búsqueda completa."
+  spec.summary       = "YouTube music player for terminal"
+  spec.description   = "A lightweight YouTube player for terminal, written in Ruby. Similar to lowfi but with full search capabilities."
   spec.homepage      = "https://github.com/vitoyayo/ongaku-player"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 2.7.0"
@@ -29,16 +29,16 @@ Gem::Specification.new do |spec|
 
   spec.post_install_message = <<~MSG
     ╔═══════════════════════════════════════════════════════════════╗
-    ║           🎵 Ongaku Player instalado con éxito! 🎵            ║
+    ║           🎵 Ongaku Player installed successfully! 🎵         ║
     ╚═══════════════════════════════════════════════════════════════╝
 
-    IMPORTANTE: Este programa requiere dependencias del sistema:
+    IMPORTANT: This program requires system dependencies:
 
-    📦 Dependencias necesarias:
-       • yt-dlp (para buscar en YouTube)
-       • mpv (para reproducir audio)
+    📦 Required dependencies:
+       • yt-dlp (for YouTube search)
+       • mpv (for audio playback)
 
-    🔧 Instalación rápida de dependencias:
+    🔧 Quick dependency installation:
 
        Ubuntu/Debian:
        $ sudo apt-get install yt-dlp mpv
@@ -49,12 +49,12 @@ Gem::Specification.new do |spec|
        Arch Linux:
        $ sudo pacman -S yt-dlp mpv
 
-    🚀 Para ejecutar:
+    🚀 To run:
        $ ongaku
 
-    📖 Documentación completa:
+    📖 Full documentation:
        https://github.com/vitoyayo/ongaku-player
 
-    ¡Disfruta tu música! 🎧
+    Enjoy your music! 🎧
   MSG
 end

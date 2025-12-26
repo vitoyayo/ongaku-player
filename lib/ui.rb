@@ -54,21 +54,21 @@ class UI
 
   def main_menu
     loop do
-      # Verificar si terminó la canción y hay que reproducir la siguiente
+      # Check if the song ended and we need to play the next one
       check_autoplay
 
       show_current_track if @player.playing?
 
       choices = [
-        { name: "🔍 Buscar música", value: :search },
-        { name: "⭐ Favoritos (#{@favorites.count})", value: :favorites },
-        { name: "📋 Ver cola (#{@queue.length} canciones)", value: :queue },
-        { name: "⏯️  Reproducción", value: :controls },
+        { name: "🔍 Search music", value: :search },
+        { name: "⭐ Favorites (#{@favorites.count})", value: :favorites },
+        { name: "📋 View queue (#{@queue.length} songs)", value: :queue },
+        { name: "⏯️  Playback", value: :controls },
         { name: "🔄 Autoplay: #{@autoplay ? 'ON' : 'OFF'}", value: :toggle_autoplay },
-        { name: "❌ Salir", value: :exit }
+        { name: "❌ Exit", value: :exit }
       ]
 
-      choice = @prompt.select("¿Qué deseas hacer?", choices, per_page: 10)
+      choice = @prompt.select("What would you like to do?", choices, per_page: 10)
 
       case choice
       when :search
@@ -81,12 +81,12 @@ class UI
         show_controls
       when :toggle_autoplay
         @autoplay = !@autoplay
-        status = @autoplay ? "activado" : "desactivado"
+        status = @autoplay ? "enabled" : "disabled"
         puts @pastel.cyan("🔄 Autoplay #{status}")
         sleep 0.5
       when :exit
         cleanup
-        puts @pastel.green("\n¡Adiós! 👋\n")
+        puts @pastel.green("\nGoodbye! 👋\n")
         exit
       end
     end
@@ -97,7 +97,7 @@ class UI
     return if @player.playing?
     return if @suggestions.empty?
 
-    # Reproducir siguiente sugerencia
+    # Play next suggestion
     next_track = @suggestions.shift
     if next_track
       @queue << next_track
@@ -108,16 +108,16 @@ class UI
   def show_current_track
     if @player.current_track
       track = @player.current_track
-      status = @player.playing? ? "▶️  Reproduciendo" : "⏸️  Pausado"
+      status = @player.playing? ? "▶️  Playing" : "⏸️  Paused"
       puts @pastel.green.bold("#{status}: ") + @pastel.white(track[:title])
       puts @pastel.dim("   [#{track[:duration]}]")
 
       if @autoplay && @queue.length > 1
-        # Mostrar siguiente en cola
+        # Show next in queue
         current_idx = @queue.find_index { |t| t[:id] == track[:id] }
         if current_idx && current_idx < @queue.length - 1
           next_track = @queue[current_idx + 1]
-          puts @pastel.dim("   Siguiente: #{next_track[:title]}")
+          puts @pastel.dim("   Next: #{next_track[:title]}")
         end
       end
       puts @pastel.dim("─" * 60)
@@ -126,27 +126,27 @@ class UI
 
   def search_music
     show_banner
-    puts @pastel.dim("💡 Tip: Usa tags para búsquedas específicas (ej: #ambient, #lofi, #jazz)")
-    puts @pastel.dim("     Ejemplo: 'study music #chill' o solo '#ambient'")
-    puts @pastel.dim("     Presiona Enter sin escribir nada para volver\n")
+    puts @pastel.dim("💡 Tip: Use tags for specific searches (e.g., #ambient, #lofi, #jazz)")
+    puts @pastel.dim("     Example: 'study music #chill' or just '#ambient'")
+    puts @pastel.dim("     Press Enter without typing to go back\n")
 
-    query = @prompt.ask("🔍 Buscar en YouTube:")
+    query = @prompt.ask("🔍 Search on YouTube:")
 
-    # Si no escribió nada, volver al menú
+    # If nothing was typed, return to menu
     return if query.nil? || query.strip.empty?
 
     tags = query.scan(/#(\w+)/).flatten
     if tags.any?
-      puts @pastel.cyan("\n🏷️  Buscando con tags: #{tags.map { |t| "##{t}" }.join(', ')}")
+      puts @pastel.cyan("\n🏷️  Searching with tags: #{tags.map { |t| "##{t}" }.join(', ')}")
     end
 
-    puts @pastel.yellow("⏳ Buscando...")
+    puts @pastel.yellow("⏳ Searching...")
 
     begin
       results = YouTubeSearch.search(query, 50)
 
       if results.empty?
-        @prompt.error("No se encontraron resultados")
+        @prompt.error("No results found")
         sleep 1
         return
       end
@@ -158,9 +158,9 @@ class UI
         }
       end
 
-      choices << { name: @pastel.dim("← Volver"), value: :back }
+      choices << { name: @pastel.dim("← Back"), value: :back }
 
-      selected = @prompt.select("Selecciona una canción:", choices, per_page: 20)
+      selected = @prompt.select("Select a song:", choices, per_page: 20)
 
       return if selected == :back
 
@@ -175,7 +175,7 @@ class UI
 
   def add_to_queue(track)
     @queue << track unless @queue.any? { |t| t[:id] == track[:id] }
-    puts @pastel.green("✓ Agregado a la cola: #{track[:title]}")
+    puts @pastel.green("✓ Added to queue: #{track[:title]}")
     sleep 0.5
   end
 
@@ -184,19 +184,19 @@ class UI
       show_banner
 
       if @queue.empty? && @suggestions.empty?
-        puts @pastel.yellow("La cola está vacía")
-        @prompt.keypress("Presiona cualquier tecla para continuar...")
+        puts @pastel.yellow("The queue is empty")
+        @prompt.keypress("Press any key to continue...")
         return
       end
 
       choices = []
 
-      # Opción de volver al inicio
-      choices << { name: @pastel.dim("← Volver al menú"), value: :back }
+      # Option to go back to start
+      choices << { name: @pastel.dim("← Back to menu"), value: :back }
 
-      # Mostrar cola actual
+      # Show current queue
       if @queue.any?
-        puts @pastel.cyan("Cola de reproducción (#{@queue.length}):")
+        puts @pastel.cyan("Playback queue (#{@queue.length}):")
         @queue.each_with_index do |track, index|
           prefix = @player.current_track && @player.current_track[:id] == track[:id] ? "▶️ " : "   "
           choices << {
@@ -206,9 +206,9 @@ class UI
         end
       end
 
-      # Mostrar sugerencias
+      # Show suggestions
       if @suggestions.any?
-        choices << { name: @pastel.dim("─── Sugerencias (#{@suggestions.length}) ───"), value: :none }
+        choices << { name: @pastel.dim("─── Suggestions (#{@suggestions.length}) ───"), value: :none }
         @suggestions.first(10).each do |track|
           choices << {
             name: "   #{track[:title]} [#{track[:duration]}]",
@@ -217,7 +217,7 @@ class UI
         end
       end
 
-      selected = @prompt.select("Selecciona una canción:", choices, per_page: 20)
+      selected = @prompt.select("Select a song:", choices, per_page: 20)
 
       case selected
       when :back
@@ -242,16 +242,16 @@ class UI
       show_banner
 
       if @favorites.empty?
-        puts @pastel.yellow("No tienes favoritos guardados")
-        puts @pastel.dim("\nAgrega canciones a favoritos desde el menú de reproducción")
-        @prompt.keypress("Presiona cualquier tecla para continuar...")
+        puts @pastel.yellow("You have no saved favorites")
+        puts @pastel.dim("\nAdd songs to favorites from the playback menu")
+        @prompt.keypress("Press any key to continue...")
         return
       end
 
-      puts @pastel.yellow("⭐ Tus Favoritos (#{@favorites.count}):\n")
+      puts @pastel.yellow("⭐ Your Favorites (#{@favorites.count}):\n")
 
       choices = []
-      choices << { name: @pastel.dim("← Volver al menú"), value: :back }
+      choices << { name: @pastel.dim("← Back to menu"), value: :back }
 
       @favorites.list.each do |track|
         is_current = @player.current_track && @player.current_track[:id] == track[:id]
@@ -262,9 +262,9 @@ class UI
         }
       end
 
-      choices << { name: @pastel.red("🗑️  Eliminar favoritos..."), value: :delete_menu }
+      choices << { name: @pastel.red("🗑️  Delete favorites..."), value: :delete_menu }
 
-      selected = @prompt.select("Selecciona una canción:", choices, per_page: 15)
+      selected = @prompt.select("Select a song:", choices, per_page: 15)
 
       case selected
       when :back
@@ -283,10 +283,10 @@ class UI
 
   def delete_favorites_menu
     show_banner
-    puts @pastel.red("🗑️  Eliminar Favoritos:\n")
+    puts @pastel.red("🗑️  Delete Favorites:\n")
 
     choices = []
-    choices << { name: @pastel.dim("← Cancelar"), value: :back }
+    choices << { name: @pastel.dim("← Cancel"), value: :back }
 
     @favorites.list.each do |track|
       choices << {
@@ -295,12 +295,12 @@ class UI
       }
     end
 
-    selected = @prompt.select("Selecciona para eliminar:", choices, per_page: 15)
+    selected = @prompt.select("Select to delete:", choices, per_page: 15)
 
     return if selected == :back
 
     if @favorites.remove(selected[:id])
-      puts @pastel.green("✓ Eliminado de favoritos: #{selected[:title]}")
+      puts @pastel.green("✓ Removed from favorites: #{selected[:title]}")
       sleep 0.5
     end
   end
@@ -312,11 +312,11 @@ class UI
 
     if @favorites.include?(track[:id])
       if @favorites.remove(track[:id])
-        puts @pastel.yellow("💔 Eliminado de favoritos: #{track[:title]}")
+        puts @pastel.yellow("💔 Removed from favorites: #{track[:title]}")
       end
     else
       if @favorites.add(track)
-        puts @pastel.green("⭐ Agregado a favoritos: #{track[:title]}")
+        puts @pastel.green("⭐ Added to favorites: #{track[:title]}")
       end
     end
     sleep 0.5
@@ -324,19 +324,19 @@ class UI
 
   def play_track(track)
     show_banner
-    puts @pastel.cyan("⏳ Cargando: #{track[:title]}...")
-    puts @pastel.dim("   (El audio puede tardar unos segundos en comenzar)")
+    puts @pastel.cyan("⏳ Loading: #{track[:title]}...")
+    puts @pastel.dim("   (Audio may take a few seconds to start)")
 
     begin
       if @player.play(track[:url], track)
-        puts @pastel.green("▶️  Reproduciendo: #{track[:title]}")
+        puts @pastel.green("▶️  Playing: #{track[:title]}")
 
-        # Cargar sugerencias en background
+        # Load suggestions in background
         load_suggestions_async(track[:url])
 
         sleep 0.5
       else
-        @prompt.error("No se pudo reproducir la canción")
+        @prompt.error("Could not play the song")
       end
 
     rescue => e
@@ -352,19 +352,19 @@ class UI
       @loading_suggestions = true
       begin
         related = YouTubeSearch.get_related(video_url, 30)
-        # Filtrar los que ya están en cola
+        # Filter those already in queue
         queue_ids = @queue.map { |t| t[:id] }
         new_suggestions = related.reject { |t| queue_ids.include?(t[:id]) }
 
-        # Agregar las primeras 20 sugerencias a la cola automáticamente
+        # Add first 20 suggestions to queue automatically
         new_suggestions.first(20).each do |track|
           @queue << track unless @queue.any? { |t| t[:id] == track[:id] }
         end
 
-        # Guardar el resto como sugerencias adicionales
+        # Save the rest as additional suggestions
         @suggestions = new_suggestions.drop(20)
       rescue => e
-        # Ignorar errores de carga de sugerencias
+        # Ignore suggestion loading errors
       ensure
         @loading_suggestions = false
       end
@@ -381,28 +381,28 @@ class UI
           play_next
           next
         end
-        puts @pastel.yellow("\nNo hay nada reproduciéndose")
-        @prompt.keypress("Presiona cualquier tecla para continuar...")
+        puts @pastel.yellow("\nNothing is playing")
+        @prompt.keypress("Press any key to continue...")
         return
       end
 
       is_favorite = @player.current_track && @favorites.include?(@player.current_track[:id])
-      fav_label = is_favorite ? "💔 Quitar de favoritos" : "⭐ Agregar a favoritos"
+      fav_label = is_favorite ? "💔 Remove from favorites" : "⭐ Add to favorites"
 
       choices = [
-        { name: "⏸️  Pausar/Reanudar", value: :pause },
+        { name: "⏸️  Pause/Resume", value: :pause },
         { name: fav_label, value: :toggle_favorite },
-        { name: "⏹️  Detener", value: :stop },
-        { name: "⏭️  Siguiente", value: :next },
-        { name: "⏮️  Anterior", value: :prev },
-        { name: "🔊 Subir volumen", value: :vol_up },
-        { name: "🔉 Bajar volumen", value: :vol_down },
-        { name: "⏩ Adelantar 10s", value: :forward },
-        { name: "⏪ Retroceder 10s", value: :backward },
-        { name: @pastel.dim("← Volver al menú"), value: :back }
+        { name: "⏹️  Stop", value: :stop },
+        { name: "⏭️  Next", value: :next },
+        { name: "⏮️  Previous", value: :prev },
+        { name: "🔊 Volume up", value: :vol_up },
+        { name: "🔉 Volume down", value: :vol_down },
+        { name: "⏩ Forward 10s", value: :forward },
+        { name: "⏪ Rewind 10s", value: :backward },
+        { name: @pastel.dim("← Back to menu"), value: :back }
       ]
 
-      choice = @prompt.select("Controles:", choices, per_page: 10)
+      choice = @prompt.select("Controls:", choices, per_page: 10)
 
       case choice
       when :pause
@@ -431,7 +431,7 @@ class UI
   end
 
   def play_next
-    # Primero intentar con sugerencias si autoplay está activo
+    # First try with suggestions if autoplay is active
     if @autoplay && !@suggestions.empty?
       next_track = @suggestions.shift
       add_to_queue(next_track)
@@ -439,7 +439,7 @@ class UI
       return
     end
 
-    # Si no, usar la cola normal
+    # Otherwise, use the normal queue
     return if @queue.empty?
 
     current_id = @player.current_track&.dig(:id)

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-# Demo visual del reproductor Ongaku
-# Muestra la interfaz sin necesidad de reproducir música real
+# Visual demo of the Ongaku player
+# Shows the interface without needing to play real music
 
 require 'tty-prompt'
 require 'tty-box'
@@ -19,25 +19,25 @@ banner = TTY::Box.frame(
   align: :center
 )
 puts banner
-puts pastel.dim("Reproductor de YouTube para terminal\n")
-puts pastel.yellow("Modo: DEMO (usando canciones de ejemplo)\n\n")
+puts pastel.dim("YouTube player for terminal\n")
+puts pastel.yellow("Mode: DEMO (using sample songs)\n\n")
 
-# Mostrar lista de canciones disponibles
-puts pastel.green.bold("📋 Canciones disponibles en modo demo:\n\n")
+# Show list of available songs
+puts pastel.green.bold("📋 Available songs in demo mode:\n\n")
 
 DemoMode::DEMO_TRACKS.each_with_index do |track, i|
   puts "#{pastel.cyan((i+1).to_s.rjust(2))}. #{track[:title]}"
-  puts "    #{pastel.dim("Duración:")} #{track[:duration]}"
+  puts "    #{pastel.dim("Duration:")} #{track[:duration]}"
   puts ""
 end
 
 puts "\n" + pastel.dim("─" * 70) + "\n\n"
 
-# Simular búsqueda
-puts pastel.yellow("🔍 Ejemplo de búsqueda: 'lofi'\n\n")
+# Simulate search
+puts pastel.yellow("🔍 Search example: 'lofi'\n\n")
 
 results = DemoMode.search("lofi", 5)
-puts pastel.green("Resultados encontrados: #{results.length}\n\n")
+puts pastel.green("Results found: #{results.length}\n\n")
 
 results.each_with_index do |track, i|
   puts "  #{i+1}. #{track[:title]} [#{track[:duration]}]"
@@ -45,16 +45,16 @@ end
 
 puts "\n" + pastel.dim("─" * 70) + "\n\n"
 
-# Características
-puts pastel.cyan.bold("✨ Características:\n\n")
+# Features
+puts pastel.cyan.bold("✨ Features:\n\n")
 features = [
-  "🎧 Reproduce música desde YouTube",
-  "🖥️ Interfaz sencilla en terminal",
-  "⚡ Ligero y rápido",
-  "🎮 Controles intuitivos (pausar, siguiente, volumen, etc.)",
-  "🔍 Búsqueda integrada",
-  "📋 Cola de reproducción",
-  "🎵 Modo demo sin conexión"
+  "🎧 Play music from YouTube",
+  "🖥️ Simple terminal interface",
+  "⚡ Lightweight and fast",
+  "🎮 Intuitive controls (pause, next, volume, etc.)",
+  "🔍 Integrated search",
+  "📋 Playback queue",
+  "🎵 Offline demo mode"
 ]
 
 features.each do |feature|
@@ -63,9 +63,9 @@ end
 
 puts "\n" + pastel.dim("─" * 70) + "\n\n"
 
-puts pastel.green.bold("Para ejecutar el reproductor:\n")
-puts "  #{pastel.white("./ongaku.rb")} - Modo normal (requiere conexión)"
-puts "  #{pastel.white("DEMO_MODE=1 ./ongaku.rb")} - Modo demo\n\n"
+puts pastel.green.bold("To run the player:\n")
+puts "  #{pastel.white("./ongaku.rb")} - Normal mode (requires connection)"
+puts "  #{pastel.white("DEMO_MODE=1 ./ongaku.rb")} - Demo mode\n\n"
 
-puts pastel.dim("Presiona Ctrl+C para salir de este demo")
-puts pastel.dim("o ejecuta el reproductor real con los comandos de arriba\n")
+puts pastel.dim("Press Ctrl+C to exit this demo")
+puts pastel.dim("or run the real player with the commands above\n")

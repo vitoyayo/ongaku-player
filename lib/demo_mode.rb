@@ -1,4 +1,4 @@
-# Modo demo para cuando no hay conexión a YouTube
+# Demo mode for when there is no connection to YouTube
 class DemoMode
   DEMO_TRACKS = [
     {
@@ -74,27 +74,27 @@ class DemoMode
   ].freeze
 
   def self.search(query, max_results = 10)
-    # Extraer tags de la búsqueda
+    # Extract tags from the search
     tags = query.scan(/#(\w+)/).flatten.map(&:downcase)
 
     if tags.any?
-      # Búsqueda por tags
+      # Search by tags
       results = DEMO_TRACKS.select do |track|
         track_tags = track[:tags] || []
         title_lower = track[:title].downcase
 
-        # Verificar si coincide con algún tag
+        # Check if it matches any tag
         tags.any? { |tag| track_tags.include?(tag) || title_lower.include?(tag) }
       end
     else
-      # Búsqueda normal por título
+      # Normal search by title
       query_lower = query.downcase
       results = DEMO_TRACKS.select do |track|
         track[:title].downcase.include?(query_lower)
       end
     end
 
-    # Si no hay resultados, devolver todos
+    # If no results, return all
     results = DEMO_TRACKS if results.empty?
 
     results.take(max_results)

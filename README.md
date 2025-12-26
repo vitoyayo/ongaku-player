@@ -1,22 +1,22 @@
 # 🎵 Ongaku Player
 
-Un reproductor de música de YouTube ligero para terminal, escrito en Ruby.
+A lightweight YouTube music player for terminal, written in Ruby.
 
-## Características
+## Features
 
-- 🎧 Reproduce música directamente desde YouTube
-- 🖥️ Interfaz sencilla en terminal
-- ⚡ Ligero y rápido
-- 🎮 Controles intuitivos
-- 🔍 Búsqueda integrada de YouTube
+- 🎧 Play music directly from YouTube
+- 🖥️ Simple terminal interface
+- ⚡ Lightweight and fast
+- 🎮 Intuitive controls
+- 🔍 Integrated YouTube search
 
-## Requisitos
+## Requirements
 
 - Ruby 2.7+
-- `yt-dlp` (para obtener URLs de YouTube)
-- `mpv` (para reproducir audio)
+- `yt-dlp` (for getting YouTube URLs)
+- `mpv` (for audio playback)
 
-### Instalación de dependencias del sistema
+### System dependency installation
 
 #### Ubuntu/Debian
 ```bash
@@ -33,36 +33,36 @@ brew install yt-dlp mpv
 sudo pacman -S yt-dlp mpv
 ```
 
-## Instalación
+## Installation
 
-### Método 1: Instalación automática (Recomendado)
+### Method 1: Automatic installation (Recommended)
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/vitoyayo/ongaku-player.git
 cd ongaku-player
 
-# Ejecutar instalador (instala todo automáticamente)
+# Run installer (installs everything automatically)
 ./install.sh
 ```
 
-El instalador detectará tu sistema operativo e instalará:
-- Dependencias del sistema (yt-dlp, mpv)
-- Gemas de Ruby necesarias
-- El ejecutable `ongaku` en tu PATH
+The installer will detect your operating system and install:
+- System dependencies (yt-dlp, mpv)
+- Required Ruby gems
+- The `ongaku` executable in your PATH
 
-### Método 2: Instalación como gema de Ruby
+### Method 2: Installation as Ruby gem
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/vitoyayo/ongaku-player.git
 cd ongaku-player
 
-# Construir e instalar la gema
+# Build and install the gem
 gem build ongaku-player.gemspec
 gem install ongaku-player-*.gem
 
-# Instalar dependencias del sistema manualmente
+# Install system dependencies manually
 # Ubuntu/Debian:
 sudo apt-get install yt-dlp mpv
 
@@ -73,155 +73,155 @@ brew install yt-dlp mpv
 sudo pacman -S yt-dlp mpv
 ```
 
-### Método 3: Instalación con Rake
+### Method 3: Installation with Rake
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/vitoyayo/ongaku-player.git
 cd ongaku-player
 
-# Instalar dependencias del sistema primero (ver Método 2)
+# Install system dependencies first (see Method 2)
 
-# Instalar con rake
+# Install with rake
 rake install
 ```
 
-### Método 4: Instalación manual
+### Method 4: Manual installation
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/vitoyayo/ongaku-player.git
 cd ongaku-player
 
-# Instalar dependencias del sistema
+# Install system dependencies
 sudo apt-get install yt-dlp mpv  # Ubuntu/Debian
 
-# Instalar gemas de Ruby
+# Install Ruby gems
 gem install tty-prompt tty-box tty-cursor pastel
 
-# Hacer ejecutable
+# Make executable
 chmod +x ongaku.rb
 ```
 
-## Uso
+## Usage
 
 ```bash
-# Si instalaste con install.sh o como gema
+# If installed with install.sh or as gem
 ongaku
 
-# O ejecutar directamente desde el repositorio
+# Or run directly from the repository
 ./bin/ongaku
 
-# Con ruby
+# With ruby
 ruby ongaku.rb
 
-# Con rake (modo desarrollo)
+# With rake (development mode)
 rake run
 
-# Modo demo (sin conexión a internet)
+# Demo mode (without internet connection)
 DEMO_MODE=1 ongaku
-# o
+# or
 rake demo
 ```
 
-### Modos de operación
+### Operation Modes
 
-**Modo Normal**: Busca y reproduce música directamente desde YouTube usando yt-dlp.
+**Normal Mode**: Searches and plays music directly from YouTube using yt-dlp.
 
-**Modo Demo**: Si no hay conexión a internet, el reproductor automáticamente usa una lista de canciones de ejemplo. Puedes forzar el modo demo con:
+**Demo Mode**: If there's no internet connection, the player automatically uses a sample song list. You can force demo mode with:
 ```bash
 DEMO_MODE=1 ./ongaku.rb
 ```
 
-### Controles
+### Controls
 
-- `🔍 Buscar música`: Busca canciones en YouTube (o en la lista demo)
-  - Búsqueda normal: "lofi hip hop"
-  - Búsqueda por tags: "#ambient" o "#lofi beats"
-  - Combinar: "study music #chill"
-- `📋 Ver cola`: Ver y gestionar la cola de reproducción
-- `⏯️ Reproducción`: Controles de reproducción (pausar, siguiente, volumen, etc.)
-- `❌ Salir`: Cerrar el reproductor
+- `🔍 Search music`: Search songs on YouTube (or in demo list)
+  - Normal search: "lofi hip hop"
+  - Search by tags: "#ambient" or "#lofi beats"
+  - Combined: "study music #chill"
+- `📋 View queue`: View and manage playback queue
+- `⏯️ Playback`: Playback controls (pause, next, volume, etc.)
+- `❌ Exit`: Close the player
 
-### Controles de reproducción
+### Playback Controls
 
-- ⏸️ Pausar/Reanudar
-- ⏹️ Detener
-- ⏭️ Siguiente canción
-- ⏮️ Canción anterior
-- 🔊 Subir volumen
-- 🔉 Bajar volumen
-- ⏩ Adelantar 10 segundos
-- ⏪ Retroceder 10 segundos
+- ⏸️ Pause/Resume
+- ⏹️ Stop
+- ⏭️ Next song
+- ⏮️ Previous song
+- 🔊 Volume up
+- 🔉 Volume down
+- ⏩ Forward 10 seconds
+- ⏪ Rewind 10 seconds
 
-## Arquitectura
+## Architecture
 
-El reproductor está diseñado para ser lo más ligero posible:
+The player is designed to be as lightweight as possible:
 
-- Usa `yt-dlp` para obtener URLs de streaming de YouTube
-- Usa `mpv` como backend de audio (muy eficiente)
-- Interfaz minimalista con `tty-prompt`
-- Sin descargas de archivos (streaming directo)
+- Uses `yt-dlp` to get streaming URLs from YouTube
+- Uses `mpv` as audio backend (very efficient)
+- Minimalist interface with `tty-prompt`
+- No file downloads (direct streaming)
 
-## Comandos útiles
+## Useful Commands
 
 ```bash
-# Construir la gema
+# Build the gem
 rake build
 
-# Instalar localmente
+# Install locally
 rake install
 
-# Desinstalar
+# Uninstall
 rake uninstall
 
-# Ejecutar en desarrollo
+# Run in development
 rake run
 
-# Modo demo
+# Demo mode
 rake demo
 
-# Mostrar demo visual
+# Show visual demo
 rake show_demo
 
-# Probar búsqueda
+# Test search
 rake test_search
 
-# Limpiar y reinstalar
+# Clean and reinstall
 rake reinstall
 ```
 
-## Desarrollo
+## Development
 
-### Estructura del proyecto
+### Project Structure
 
 ```
 ongaku-player/
 ├── bin/
-│   └── ongaku              # Ejecutable principal
+│   └── ongaku              # Main executable
 ├── lib/
-│   ├── ongaku_player.rb    # Módulo principal
-│   ├── youtube_search.rb   # Búsqueda en YouTube
-│   ├── player.rb           # Reproductor con mpv
-│   ├── ui.rb               # Interfaz de usuario
-│   └── demo_mode.rb        # Modo demo
-├── ongaku-player.gemspec   # Especificación de la gema
-├── Gemfile                 # Dependencias
-├── Rakefile                # Tareas de rake
-├── install.sh              # Instalador automático
-├── README.md               # Este archivo
-├── FEATURES.md             # Características detalladas
-└── LICENSE                 # Licencia MIT
+│   ├── ongaku_player.rb    # Main module
+│   ├── youtube_search.rb   # YouTube search
+│   ├── player.rb           # Player with mpv
+│   ├── ui.rb               # User interface
+│   └── demo_mode.rb        # Demo mode
+├── ongaku-player.gemspec   # Gem specification
+├── Gemfile                 # Dependencies
+├── Rakefile                # Rake tasks
+├── install.sh              # Automatic installer
+├── README.md               # This file
+├── FEATURES.md             # Detailed features
+└── LICENSE                 # MIT License
 ```
 
-### Contribuir
+### Contributing
 
-1. Fork el proyecto
-2. Crea tu rama de características (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
 
-## Licencia
+## License
 
-MIT - Ver [LICENSE](LICENSE) para más detalles.
+MIT - See [LICENSE](LICENSE) for more details.

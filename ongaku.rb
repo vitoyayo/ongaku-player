@@ -3,7 +3,7 @@
 require 'bundler/setup'
 require_relative 'lib/ui'
 
-# Verificar dependencias del sistema
+# Check system dependencies
 def check_dependencies
   missing = []
 
@@ -16,8 +16,8 @@ def check_dependencies
   end
 
   unless missing.empty?
-    puts "❌ Faltan dependencias del sistema: #{missing.join(', ')}"
-    puts "\nInstalación:"
+    puts "❌ Missing system dependencies: #{missing.join(', ')}"
+    puts "\nInstallation:"
     puts "  Ubuntu/Debian: sudo apt-get install #{missing.join(' ')}"
     puts "  macOS: brew install #{missing.join(' ')}"
     puts "  Arch Linux: sudo pacman -S #{missing.join(' ')}"
@@ -25,15 +25,15 @@ def check_dependencies
   end
 end
 
-# Verificar dependencias
+# Check dependencies
 check_dependencies
 
-# Iniciar interfaz
+# Start interface
 begin
   ui = UI.new
   ui.start
 rescue Interrupt
-  puts "\n\n👋 ¡Hasta luego!"
+  puts "\n\n👋 Goodbye!"
   exit
 rescue => e
   puts "\n❌ Error: #{e.message}"

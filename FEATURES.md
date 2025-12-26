@@ -1,146 +1,146 @@
-# Características de Ongaku Player
+# Ongaku Player Features
 
-## 🎯 Objetivos del proyecto
+## 🎯 Project Goals
 
-Crear un reproductor de música de YouTube ligero para terminal, similar a lowfi, pero con capacidades completas de búsqueda y reproducción.
+Create a lightweight YouTube music player for terminal, similar to lowfi, but with full search and playback capabilities.
 
-## ✨ Características implementadas
+## ✨ Implemented Features
 
-### 🔍 Búsqueda en YouTube
-- Búsqueda integrada usando yt-dlp
-- Resultados con título y duración
-- Selección interactiva con tty-prompt
-- Filtrado de resultados
+### 🔍 YouTube Search
+- Integrated search using yt-dlp
+- Results with title and duration
+- Interactive selection with tty-prompt
+- Results filtering
 
-### 🎵 Reproducción
-- Streaming directo (sin descargas)
-- Backend con mpv (muy eficiente)
-- Solo audio (no video)
-- Reproducción en background
+### 🎵 Playback
+- Direct streaming (no downloads)
+- Backend with mpv (very efficient)
+- Audio only (no video)
+- Background playback
 
-### 🎮 Controles
-- ⏸️ Pausar/Reanudar
-- ⏹️ Detener
-- ⏭️ Siguiente canción
-- ⏮️ Canción anterior
-- 🔊/🔉 Control de volumen
-- ⏩/⏪ Adelantar/Retroceder
+### 🎮 Controls
+- ⏸️ Pause/Resume
+- ⏹️ Stop
+- ⏭️ Next song
+- ⏮️ Previous song
+- 🔊/🔉 Volume control
+- ⏩/⏪ Forward/Rewind
 
-### 📋 Gestión de cola
-- Cola de reproducción
-- Ver todas las canciones
-- Saltar a cualquier canción
-- Indicador de canción actual
+### 📋 Queue Management
+- Playback queue
+- View all songs
+- Skip to any song
+- Current song indicator
 
-### 🎨 Interfaz
-- UI con tty-prompt (menús interactivos)
-- Cajas decorativas con tty-box
-- Colores con pastel
-- Diseño minimalista
+### 🎨 Interface
+- UI with tty-prompt (interactive menus)
+- Decorative boxes with tty-box
+- Colors with pastel
+- Minimalist design
 
-### 🚀 Modo Demo
-- Lista de canciones de ejemplo
-- Funciona sin conexión
-- Detección automática de conectividad
-- Útil para pruebas
+### 🚀 Demo Mode
+- Sample song list
+- Works offline
+- Automatic connectivity detection
+- Useful for testing
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
 ```
 ongaku-player/
-├── ongaku.rb              # Archivo principal ejecutable
+├── ongaku.rb              # Main executable file
 ├── lib/
-│   ├── youtube_search.rb  # Búsqueda en YouTube con yt-dlp
-│   ├── player.rb          # Reproductor con mpv
-│   ├── ui.rb              # Interfaz de usuario
-│   └── demo_mode.rb       # Modo demo sin conexión
-├── demo.rb                # Demo visual
-├── test_search.rb         # Script de prueba
-├── Gemfile                # Dependencias Ruby
-├── README.md              # Documentación principal
-└── FEATURES.md            # Este archivo
+│   ├── youtube_search.rb  # YouTube search with yt-dlp
+│   ├── player.rb          # Player with mpv
+│   ├── ui.rb              # User interface
+│   └── demo_mode.rb       # Offline demo mode
+├── demo.rb                # Visual demo
+├── test_search.rb         # Test script
+├── Gemfile                # Ruby dependencies
+├── README.md              # Main documentation
+└── FEATURES.md            # This file
 ```
 
-## 🔧 Dependencias
+## 🔧 Dependencies
 
-### Sistema
-- `yt-dlp`: Para buscar y obtener URLs de YouTube
-- `mpv`: Para reproducir el audio
+### System
+- `yt-dlp`: For searching and getting YouTube URLs
+- `mpv`: For audio playback
 
-### Ruby (gemas)
-- `tty-prompt`: Menús interactivos
-- `tty-box`: Cajas decorativas
-- `tty-cursor`: Control del cursor
-- `pastel`: Colores en terminal
-- `down`: Descarga de archivos (opcional)
+### Ruby (gems)
+- `tty-prompt`: Interactive menus
+- `tty-box`: Decorative boxes
+- `tty-cursor`: Cursor control
+- `pastel`: Terminal colors
+- `down`: File download (optional)
 
-## 💡 Decisiones de diseño
+## 💡 Design Decisions
 
-### ¿Por qué yt-dlp?
-- Más mantenido que youtube-dl
-- Soporte para múltiples sitios
-- Actualizado frecuentemente
-- Excelente para extraer URLs de streaming
+### Why yt-dlp?
+- Better maintained than youtube-dl
+- Support for multiple sites
+- Frequently updated
+- Excellent for extracting streaming URLs
 
-### ¿Por qué mpv?
-- Muy ligero y eficiente
-- Soporte para streaming
-- Control por socket IPC
-- Sin interfaz gráfica necesaria
+### Why mpv?
+- Very lightweight and efficient
+- Streaming support
+- IPC socket control
+- No graphical interface required
 
-### ¿Por qué Ruby?
-- Sintaxis elegante y clara
-- Excelentes gemas para terminal (tty-*)
-- Fácil de leer y mantener
-- Ideal para scripts de sistema
+### Why Ruby?
+- Elegant and clear syntax
+- Excellent terminal gems (tty-*)
+- Easy to read and maintain
+- Ideal for system scripts
 
-### ¿Por qué no descargar los archivos?
-- Streaming directo ahorra espacio
-- Reproducción inmediata
-- No requiere limpieza de archivos temporales
-- Menor uso de disco
+### Why not download files?
+- Direct streaming saves space
+- Immediate playback
+- No temporary file cleanup required
+- Lower disk usage
 
-## 🎯 Casos de uso
+## 🎯 Use Cases
 
-1. **Programadores**: Música de fondo mientras codean
-2. **Estudiantes**: Música para estudiar/concentrarse
-3. **Servidores remotos**: Reproducción en SSH
-4. **Minimalistas**: Sin necesidad de navegador
-5. **Usuarios de terminal**: Todo desde la línea de comandos
+1. **Programmers**: Background music while coding
+2. **Students**: Music for studying/concentrating
+3. **Remote servers**: Playback via SSH
+4. **Minimalists**: No browser needed
+5. **Terminal users**: Everything from the command line
 
-## 🔮 Posibles mejoras futuras
+## 🔮 Possible Future Improvements
 
-- [ ] Playlists guardadas
-- [ ] Historial de reproducción
-- [ ] Ecualización de audio
-- [ ] Letras sincronizadas
-- [ ] Soporte para SoundCloud
-- [ ] Búsqueda por artista/álbum
-- [ ] Visualizador de espectro ASCII
-- [ ] Hotkeys globales
-- [ ] Guardado de estado entre sesiones
-- [ ] Modo aleatorio (shuffle)
-- [ ] Repetir canción/cola
+- [ ] Saved playlists
+- [ ] Playback history
+- [ ] Audio equalization
+- [ ] Synchronized lyrics
+- [ ] SoundCloud support
+- [ ] Search by artist/album
+- [ ] ASCII spectrum visualizer
+- [ ] Global hotkeys
+- [ ] State saving between sessions
+- [ ] Shuffle mode
+- [ ] Repeat song/queue
 
-## 📊 Comparación con otras soluciones
+## 📊 Comparison with Other Solutions
 
 ### vs lowfi
-- ✅ Similar en concepto
-- ✅ Ongaku tiene búsqueda completa
-- ✅ Más opciones de control
-- ✅ Cola de reproducción
+- ✅ Similar in concept
+- ✅ Ongaku has full search
+- ✅ More control options
+- ✅ Playback queue
 
-### vs YouTube en navegador
-- ✅ Mucho más ligero
-- ✅ Sin consumo de RAM del navegador
-- ✅ Interfaz más rápida
-- ❌ Sin comentarios/likes
+### vs YouTube in browser
+- ✅ Much lighter
+- ✅ No browser RAM consumption
+- ✅ Faster interface
+- ❌ No comments/likes
 
 ### vs spotify-tui
-- ✅ No requiere cuenta premium
-- ✅ Acceso a todo YouTube
-- ❌ Spotify tiene mejor catálogo organizado
+- ✅ No premium account required
+- ✅ Access to all of YouTube
+- ❌ Spotify has better organized catalog
 
-## 📝 Licencia
+## 📝 License
 
 MIT
