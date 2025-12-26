@@ -2,7 +2,7 @@
 
 ## 🎯 Project Goals
 
-Create a lightweight YouTube music player for terminal, similar to lowfi, but with full search and playback capabilities.
+A lightweight YouTube music player for terminal.
 
 ## ✨ Implemented Features
 
@@ -82,17 +82,6 @@ ongaku-player/
 - Frequently updated
 - Excellent for extracting streaming URLs
 
-### Why mpv?
-- Very lightweight and efficient
-- Streaming support
-- IPC socket control
-- No graphical interface required
-
-### Why Ruby?
-- Elegant and clear syntax
-- Excellent terminal gems (tty-*)
-- Easy to read and maintain
-- Ideal for system scripts
 
 ### Why not download files?
 - Direct streaming saves space
