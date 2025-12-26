@@ -5,7 +5,11 @@ require 'timeout'
 class Player
   attr_reader :current_track, :playing
 
-  SOCKET_PATH = '/tmp/ongaku-mpv-socket'
+  SOCKET_PATH = '/tmp/ongaku-mpv-socket'.freeze
+  AUDIO_FORMAT = '251/140/bestaudio'.freeze  # Opus (251), M4A (140), or best available
+  VOLUME_STEP = 5                             # Volume increment/decrement amount
+  SEEK_SECONDS = 10                           # Seek forward/backward amount
+  STARTUP_DELAY = 2                           # Seconds to wait for yt-dlp to start
 
   def initialize
     @pid = nil
@@ -56,7 +60,7 @@ class Player
       @pid = nil
     end
 
-    sleep 2
+    sleep STARTUP_DELAY
   end
 
   def play_with_pipe(url)
@@ -73,7 +77,7 @@ class Player
       reader.close
       $stdout.reopen(writer)
       $stderr.reopen('/dev/null', 'w')
-      exec(ytdlp_cmd, '-f', '251/140/bestaudio', '-o', '-', '--no-warnings', '--no-progress', url)
+      exec(ytdlp_cmd, '-f', AUDIO_FORMAT, '-o', '-', '--no-warnings', '--no-progress', url)
     end
     writer.close
 
@@ -98,7 +102,7 @@ class Player
     end
 
     # Wait for yt-dlp to start sending data
-    sleep 2
+    sleep STARTUP_DELAY
   end
 
   def stop
@@ -153,19 +157,19 @@ class Player
   end
 
   def volume_up
-    send_command(['add', 'volume', '5'])
+    send_command(['add', 'volume', VOLUME_STEP.to_s])
   end
 
   def volume_down
-    send_command(['add', 'volume', '-5'])
+    send_command(['add', 'volume', (-VOLUME_STEP).to_s])
   end
 
   def seek_forward
-    send_command(['seek', '10'])
+    send_command(['seek', SEEK_SECONDS.to_s])
   end
 
   def seek_backward
-    send_command(['seek', '-10'])
+    send_command(['seek', (-SEEK_SECONDS).to_s])
   end
 
   def get_time_pos
@@ -191,7 +195,8 @@ class Player
         data = JSON.parse(response)
         return data['data'] if data['error'] == 'success'
       end
-    rescue
+    rescue Errno::ECONNREFUSED, Errno::ENOENT, JSON::ParserError, IOError => e
+      warn "[DEBUG] get_property(#{name}) failed: #{e.message}" if ENV['DEBUG']
     end
     nil
   end

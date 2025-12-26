@@ -6,6 +6,20 @@ require_relative 'player'
 require_relative 'favorites'
 
 class UI
+  # Search and queue settings
+  SEARCH_RESULTS_LIMIT = 50
+  RELATED_VIDEOS_LIMIT = 30
+  AUTO_QUEUE_SIZE = 20        # Suggestions added to queue automatically
+
+  # UI display settings
+  MENU_PAGE_SIZE = 10
+  LIST_PAGE_SIZE = 15
+  SEARCH_PAGE_SIZE = 20
+
+  # UI timing (seconds)
+  SHORT_DELAY = 0.5
+  LONG_DELAY = 1.0
+
   def initialize
     @prompt = TTY::Prompt.new
     @pastel = Pastel.new
@@ -68,7 +82,7 @@ class UI
         { name: "❌ Exit", value: :exit }
       ]
 
-      choice = @prompt.select("What would you like to do?", choices, per_page: 10)
+      choice = @prompt.select("What would you like to do?", choices, per_page: MENU_PAGE_SIZE)
 
       case choice
       when :search
@@ -83,7 +97,7 @@ class UI
         @autoplay = !@autoplay
         status = @autoplay ? "enabled" : "disabled"
         puts @pastel.cyan("🔄 Autoplay #{status}")
-        sleep 0.5
+        sleep SHORT_DELAY
       when :exit
         cleanup
         puts @pastel.green("\nGoodbye! 👋\n")
@@ -143,11 +157,11 @@ class UI
     puts @pastel.yellow("⏳ Searching...")
 
     begin
-      results = YouTubeSearch.search(query, 50)
+      results = YouTubeSearch.search(query, SEARCH_RESULTS_LIMIT)
 
       if results.empty?
         @prompt.error("No results found")
-        sleep 1
+        sleep LONG_DELAY
         return
       end
 
@@ -160,7 +174,7 @@ class UI
 
       choices << { name: @pastel.dim("← Back"), value: :back }
 
-      selected = @prompt.select("Select a song:", choices, per_page: 20)
+      selected = @prompt.select("Select a song:", choices, per_page: SEARCH_PAGE_SIZE)
 
       return if selected == :back
 
@@ -169,14 +183,14 @@ class UI
 
     rescue YouTubeSearch::SearchError => e
       @prompt.error("Error: #{e.message}")
-      sleep 1
+      sleep LONG_DELAY
     end
   end
 
   def add_to_queue(track)
     @queue << track unless @queue.any? { |t| t[:id] == track[:id] }
     puts @pastel.green("✓ Added to queue: #{track[:title]}")
-    sleep 0.5
+    sleep SHORT_DELAY
   end
 
   def show_queue
@@ -217,7 +231,7 @@ class UI
         end
       end
 
-      selected = @prompt.select("Select a song:", choices, per_page: 20)
+      selected = @prompt.select("Select a song:", choices, per_page: SEARCH_PAGE_SIZE)
 
       case selected
       when :back
@@ -264,7 +278,7 @@ class UI
 
       choices << { name: @pastel.red("🗑️  Delete favorites..."), value: :delete_menu }
 
-      selected = @prompt.select("Select a song:", choices, per_page: 15)
+      selected = @prompt.select("Select a song:", choices, per_page: LIST_PAGE_SIZE)
 
       case selected
       when :back
@@ -295,13 +309,13 @@ class UI
       }
     end
 
-    selected = @prompt.select("Select to delete:", choices, per_page: 15)
+    selected = @prompt.select("Select to delete:", choices, per_page: LIST_PAGE_SIZE)
 
     return if selected == :back
 
     if @favorites.remove(selected[:id])
       puts @pastel.green("✓ Removed from favorites: #{selected[:title]}")
-      sleep 0.5
+      sleep SHORT_DELAY
     end
   end
 
@@ -319,7 +333,7 @@ class UI
         puts @pastel.green("⭐ Added to favorites: #{track[:title]}")
       end
     end
-    sleep 0.5
+    sleep SHORT_DELAY
   end
 
   def play_track(track)
@@ -334,14 +348,14 @@ class UI
         # Load suggestions in background
         load_suggestions_async(track[:url])
 
-        sleep 0.5
+        sleep SHORT_DELAY
       else
         @prompt.error("Could not play the song")
       end
 
     rescue => e
       @prompt.error("Error: #{e.message}")
-      sleep 1
+      sleep LONG_DELAY
     end
   end
 
@@ -351,20 +365,20 @@ class UI
     Thread.new do
       @loading_suggestions = true
       begin
-        related = YouTubeSearch.get_related(video_url, 30)
+        related = YouTubeSearch.get_related(video_url, RELATED_VIDEOS_LIMIT)
         # Filter those already in queue
         queue_ids = @queue.map { |t| t[:id] }
         new_suggestions = related.reject { |t| queue_ids.include?(t[:id]) }
 
-        # Add first 20 suggestions to queue automatically
-        new_suggestions.first(20).each do |track|
+        # Add first suggestions to queue automatically
+        new_suggestions.first(AUTO_QUEUE_SIZE).each do |track|
           @queue << track unless @queue.any? { |t| t[:id] == track[:id] }
         end
 
         # Save the rest as additional suggestions
-        @suggestions = new_suggestions.drop(20)
-      rescue => e
-        # Ignore suggestion loading errors
+        @suggestions = new_suggestions.drop(AUTO_QUEUE_SIZE)
+      rescue YouTubeSearch::SearchError, StandardError => e
+        warn "[DEBUG] Failed to load suggestions: #{e.message}" if ENV['DEBUG']
       ensure
         @loading_suggestions = false
       end
@@ -402,7 +416,7 @@ class UI
         { name: @pastel.dim("← Back to menu"), value: :back }
       ]
 
-      choice = @prompt.select("Controls:", choices, per_page: 10)
+      choice = @prompt.select("Controls:", choices, per_page: MENU_PAGE_SIZE)
 
       case choice
       when :pause
